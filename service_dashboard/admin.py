@@ -10,14 +10,14 @@ from .models import NGO, Activity, Registration
 # ==========================================
 # CUSTOM USER ADMIN
 # ==========================================
-# Unregister the default User and Group
 admin.site.unregister(User)
-admin.site.unregister(Group)
 
 class CustomUserAdmin(BaseUserAdmin):
-    # The profile fields
+    # --- THE FIX: Put everything in one section to avoid the broken Jazzmin tabs ---
     fieldsets = (
-        ('Admin Profile', {'fields': ('username', 'first_name', 'last_name', 'email')}),
+        ('User Profile & Roles', {
+            'fields': ('username', 'first_name', 'last_name', 'email', 'groups')
+        }),
     )
     
     # The table columns
@@ -151,6 +151,22 @@ def custom_get_app_list(request, app_label=None):
             ]
         }
         app_list.append(custom_operations)
+
+        frontend_link = {
+            'name': 'Public Portal',
+            'app_label': 'frontend',
+            'app_url': '',
+            'has_module_perms': True,
+            'models': [
+                {
+                    'name': '🌐 View Employee Dashboard',
+                    'object_name': 'dashboard',
+                    'admin_url': reverse('dashboard'),
+                    'view_only': True,
+                }
+            ]
+        }
+        app_list.insert(0, frontend_link) # This puts it at the very top of the sidebar!
         
     return app_list
 

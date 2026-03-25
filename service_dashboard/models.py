@@ -15,12 +15,15 @@ class NGO(models.Model):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name = 'NGO'
+        verbose_name_plural = 'NGOs'
 
 class Activity(models.Model):
     # NEW: 5.1 Foreign Key mapping linking Activity to NGO
     ngo = models.ForeignKey(NGO, on_delete=models.CASCADE, related_name='activities')
     
-    # Moved from your original NGO model
     service_type = models.CharField(max_length=100)
     event_date = models.DateField()
     start_time = models.TimeField()
@@ -32,7 +35,6 @@ class Activity(models.Model):
     )
     cutoff_date = models.DateTimeField(help_text="Last date/time for employees to register")
     
-    # NEW: 5.1 Timestamp requirement
     created_at = models.DateTimeField(auto_now_add=True)
 
     # --- NEW: TASK 5.3 Custom Model & Form Validation ---
@@ -60,8 +62,8 @@ class Activity(models.Model):
         return f"{self.service_type} at {self.ngo.name}"
         
     class Meta:
-        verbose_name = 'Activity'          
-        verbose_name_plural = 'Activities'  
+        verbose_name = 'Event'          
+        verbose_name_plural = 'Events'  
 
 class Registration(models.Model):
     employee = models.ForeignKey(User, on_delete=models.CASCADE)

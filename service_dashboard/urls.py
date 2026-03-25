@@ -15,5 +15,7 @@ urlpatterns = [
 
     # UPDATED: Changed <int:ngo_id> to <int:activity_id>
     path('cancel/<int:activity_id>/', views.cancel_registration, name='cancel'),
+
+    path('smart-redirect/', views.smart_redirect, name='smart_redirect'),
 ]
 

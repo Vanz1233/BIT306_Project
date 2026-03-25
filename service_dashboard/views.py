@@ -10,9 +10,15 @@ from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 
-# --- Helper Check ---
+# --- Helper Check (UPDATED FOR TOPIC 6 RBAC) ---
 def is_admin(user):
-    return user.is_superuser or user.is_staff
+    """
+    Topic 6.4: Role-Based Access Control.
+    Checks if the user is a superuser OR belongs to the 'Admin Group'.
+    """
+    if user.is_superuser:
+        return True
+    return user.groups.filter(name='Admin Group').exists()
 
 # --- Main Views ---
 def dashboard(request):
@@ -32,7 +38,8 @@ def dashboard(request):
     return render(request, 'service_dashboard/index.html', {
         'activities': activities,
         'user_registered_ids': user_registered_ids,
-        'now': timezone.now()
+        'now': timezone.now(),
+        'is_admin_user': is_admin(request.user) if request.user.is_authenticated else False, # <-- ADD THIS LINE
     })
 
 # --- Admin Views ---
@@ -140,6 +147,16 @@ def smart_login_redirect(request):
         return redirect('/admin/')
     else:
         return redirect('/')
+    
+# ==========================================
+# TRAFFIC COP (Smart Login Redirect)
+# ==========================================
+def smart_redirect(request):
+    """Routes users to the correct dashboard based on their role after login."""
+    if is_admin(request.user):
+        return redirect('/admin/') # Sends Admins straight to the backend
+    else:
+        return redirect('dashboard') # Sends Employees to the frontend
 
 
 
