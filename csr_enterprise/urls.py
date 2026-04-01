@@ -1,8 +1,20 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.contrib.auth import logout  # <-- ADDED THIS
-from django.shortcuts import redirect   # <-- ADDED THIS
+from django.contrib.auth import logout  
+from django.shortcuts import redirect   
 from service_dashboard.views import admin_dashboard, smart_login_redirect
+
+# --- NEW: TOPIC 8 API IMPORTS ---
+from rest_framework.routers import DefaultRouter
+from service_dashboard import api_views
+
+# ==========================================
+# REST API ROUTER (TOPIC 8)
+# ==========================================
+router = DefaultRouter()
+router.register(r'ngos', api_views.NGOViewSet, basename='api-ngo')
+router.register(r'activities', api_views.ActivityViewSet, basename='api-activity')
+router.register(r'registrations', api_views.RegistrationViewSet, basename='api-registration')
 
 # ==========================================
 # CUSTOM LOGOUT REDIRECT
@@ -24,8 +36,11 @@ urlpatterns = [
     # This handles all the other admin magic (login, database tables, etc.)
     path('admin/', admin.site.urls),
 
-    path('', include('events.urls')),
-    
+    # ==========================================
+    # NEW: API VERSION 1 ROUTES (TOPIC 8.4)
+    # ==========================================
+    path('api/v1/', include(router.urls)),
+
     # Dashboard & Notifications (Landing page goes here)
     path('', include('service_dashboard.urls')),
     

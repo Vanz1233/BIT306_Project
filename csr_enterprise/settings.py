@@ -31,6 +31,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'django_filters',
 ]
 
 ROOT_URLCONF = 'csr_enterprise.urls'
@@ -173,3 +175,13 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # 3. Security configurations to protect the login session cookie
 SESSION_COOKIE_HTTPONLY = True 
 SESSION_COOKIE_SAMESITE = 'Lax'
+
+# REST Framework Global Configuration (Topic 8)
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5, # Shows 5 NGOs/Activities per page
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+    ],
+}
