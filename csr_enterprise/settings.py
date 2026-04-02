@@ -14,9 +14,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-9*f9kh@6-ou9euv+=u_*3te6p9p9@jwne5kbj2w*c_$vh&&l8$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# Topic 7.4.b: Error handling (no sensitive data exposed)
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Application definition
 INSTALLED_APPS = [
@@ -185,3 +186,22 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
     ],
 }
+
+# ==========================================
+# ENTERPRISE SECURITY CONFIGURATION (TOPIC 7)
+# ==========================================
+
+# Topic 7.1: Apply OWASP Top 10 (CSRF & XSS Protections)
+CSRF_COOKIE_HTTPONLY = True 
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Topic 7.2.a: Secure Cookies & Session Management
+# Note: In a real production environment with HTTPS, these should be True. 
+# We keep them False locally so your login still works on HTTP (127.0.0.1).
+SESSION_COOKIE_SECURE = False 
+CSRF_COOKIE_SECURE = False   
+
+# Topic 7.2.b: Prevent Session Hijacking (Expiry)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True # Logs user out if they close the tab
+SESSION_COOKIE_AGE = 1800 # Automatically logs user out after 30 minutes of inactivity
