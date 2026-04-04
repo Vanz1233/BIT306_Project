@@ -21,6 +21,7 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Application definition
 INSTALLED_APPS = [
+    'daphne',
     'jazzmin',
     'service_dashboard',
     'events',
@@ -34,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_filters',
+    'django_celery_beat',
 ]
 
 ROOT_URLCONF = 'csr_enterprise.urls'
@@ -54,7 +56,18 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'csr_enterprise.wsgi.application'
+#WSGI_APPLICATION = 'csr_enterprise.wsgi.application'
+# --- TOPIC 10.3: ASGI & CHANNELS CONFIGURATION ---
+ASGI_APPLICATION = 'csr_enterprise.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 # Database
 DATABASES = {
