@@ -1,8 +1,7 @@
 from django.db import transaction
 from django.utils import timezone
-
-# UPDATED: Imported Activity
 from .models import NGO, Activity, Registration
+from .tasks import send_registration_email
 
 class EventService:
     """
@@ -11,13 +10,11 @@ class EventService:
     """
 
     @staticmethod
-    # UPDATED: Changed ngo_id to activity_id and added user parameter for registration checks 
     def register_employee(user, activity_id):
         try:
             # Topic 4.5: Start the Atomic Transaction 
             with transaction.atomic():
                 # 1. Fetch Data & Lock the Row (Topic 4.5)
-                # UPDATED: Query Activity instead of NGO
                 activity = Activity.objects.select_for_update().get(id=activity_id)
             
                 # 2. Rule: Check Cut-off Date (Topic 2.2 - Validation)
@@ -25,7 +22,6 @@ class EventService:
                     return False, "Registration for this event has closed."
 
                 # 3. Rule: Check Duplicate Registration
-                # UPDATED: Check against activity, not ngo
                 if Registration.objects.filter(employee=user, activity=activity).exists():
                     return False, f"You are already registered for {activity.service_type}."
 
@@ -34,11 +30,17 @@ class EventService:
                     return False, f"Sorry, {activity.service_type} is full."
 
                 # 5. Execute Transaction
-                # UPDATED: Save the activity to the registration
                 Registration.objects.create(employee=user, activity=activity)
+                
+                # ==========================================
+                # TOPIC 10.2: TRIGGER BACKGROUND EMAIL TASK
+                # ==========================================
+                # .delay() drops the job into Memurai so the user doesn't wait!
+                if user.email: 
+                    send_registration_email.delay(user.email, activity.service_type, activity.ngo.name)
+
                 return True, f"Successfully registered for {activity.service_type} at {activity.ngo.name}!"
 
-        # UPDATED: Catch Activity exception
         except Activity.DoesNotExist:
             return False, "Event not found."
         except Exception as e:

@@ -205,3 +205,24 @@ CSRF_COOKIE_SECURE = False
 # Topic 7.2.b: Prevent Session Hijacking (Expiry)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True # Logs user out if they close the tab
 SESSION_COOKIE_AGE = 1800 # Automatically logs user out after 30 minutes of inactivity
+
+# ==========================================
+# ENTERPRISE CACHING CONFIGURATION (TOPIC 9.2)
+# ==========================================
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1', 
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+# CELERY SETTINGS (Topic 10.1)
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+# Print emails to the terminal instead of actually sending them
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

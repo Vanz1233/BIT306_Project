@@ -9,6 +9,7 @@ from .services import EventService
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
+from django.core.cache import cache
 
 # --- Helper Check (UPDATED FOR TOPIC 6 RBAC) ---
 def is_admin(user):
@@ -24,22 +25,27 @@ def is_admin(user):
 def dashboard(request):
     """
     The main landing page. 
-    It aggregates data but doesn't handle the 'heavy lifting' of registration logic.
     """
-    # --- UPDATED: TASK 5.4.b.i select_related() ---
-    # Fetches the linked NGO in the same query to prevent N+1 performance issues
-    activities = Activity.objects.select_related('ngo').all()
+    # --- FIX/TOPIC 9.2.a: LOW-LEVEL CACHING FOR NGO LISTING ---
+    # Try to get data from Memurai first
+    activities = cache.get('cached_activities')
+    
+    # If cache is empty, query DB and save to Memurai for 15 mins (900s)
+    if not activities:
+        activities = Activity.objects.select_related('ngo').all()
+        cache.set('cached_activities', activities, 60 * 15)
     
     user_registered_ids = []
     
     if request.user.is_authenticated:
+        # We do NOT cache this because it is unique to the logged-in user!
         user_registered_ids = Registration.objects.filter(employee=request.user).values_list('activity_id', flat=True)
 
     return render(request, 'service_dashboard/index.html', {
         'activities': activities,
         'user_registered_ids': user_registered_ids,
         'now': timezone.now(),
-        'is_admin_user': is_admin(request.user) if request.user.is_authenticated else False, # <-- ADD THIS LINE
+        'is_admin_user': is_admin(request.user) if request.user.is_authenticated else False, 
     })
 
 # --- Admin Views ---
@@ -52,28 +58,35 @@ def admin_dashboard(request):
             
     context['available_apps'] = app_list
     
-    # 2. Add our custom stats
+    # 2. Add our custom stats (Light queries, no need to cache)
     total_users = User.objects.count()
-    
     total_events = Activity.objects.count() 
     
-    active_events_count = Activity.objects.annotate(
-        booked_count=Count('registration')
-    ).filter(
-        booked_count__lt=F('max_employees'), 
-        cutoff_date__gt=timezone.now()
-    ).count()
+    # --- FIX/TOPIC 9.2.b: LOW-LEVEL CACHING FOR HEAVY ADMIN QUERIES ---
+    active_events_count = cache.get('admin_active_events')
+    if active_events_count is None:
+        active_events_count = Activity.objects.annotate(
+            booked_count=Count('registration')
+        ).filter(
+            booked_count__lt=F('max_employees'), 
+            cutoff_date__gt=timezone.now()
+        ).count()
+        cache.set('admin_active_events', active_events_count, 60 * 15)
 
-    # --- UPDATED: TASK 5.4.b select_related() AND prefetch_related() ---
-    upcoming_events = Activity.objects.select_related('ngo').prefetch_related(
-        'registration_set'
-    ).filter(
-        event_date__gte=timezone.now()
-    ).order_by('event_date')[:5]
+    upcoming_events = cache.get('admin_upcoming_events')
+    if not upcoming_events:
+        upcoming_events = Activity.objects.select_related('ngo').prefetch_related(
+            'registration_set'
+        ).filter(
+            event_date__gte=timezone.now()
+        ).order_by('event_date')[:5]
+        cache.set('admin_upcoming_events', upcoming_events, 60 * 15)
 
-    # --- NEW: TASK 5.2 .aggregate() DEMONSTRATION ---
-    # Calculates the total number of volunteer slots across all activities
-    capacity_data = Activity.objects.aggregate(total_slots=Sum('max_employees'))
+    capacity_data = cache.get('admin_capacity')
+    if not capacity_data:
+        capacity_data = Activity.objects.aggregate(total_slots=Sum('max_employees'))
+        cache.set('admin_capacity', capacity_data, 60 * 15)
+
     total_capacity = capacity_data['total_slots'] or 0
 
     # 3. Merge them together
@@ -99,6 +112,7 @@ def scanner_prototype(request):
         return redirect('scanner_prototype') 
         
     return render(request, 'service_dashboard/scanner.html', context)
+
 # --- Employee Ticket View ---
 @login_required
 def view_ticket(request, event_id):
