@@ -47,3 +47,6 @@ class Activity(models.Model):
 
     def __str__(self):
         return f"{self.service_type} at {self.ngo.name}"
+    
+    class Meta:
+        verbose_name_plural = "Activities"

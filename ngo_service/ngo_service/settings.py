@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'events',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -55,7 +57,7 @@ ROOT_URLCONF = 'ngo_service.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -116,3 +118,84 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Merged Jazzmin Settings (AuraIT branding + clean microservice links + logout button)
+JAZZMIN_SETTINGS = {
+    "site_title": "AuraIT Admin",
+    "site_header": "AuraIT Management",
+    "site_brand": "AuraIT Management",
+    
+    "topmenu_links": [
+        {
+            "name": " Logout", 
+            "url": "admin:logout", 
+            "classes": "btn btn-danger text-white fw-bold", 
+        }
+    ],
+    
+    "theme": "litera", 
+    "hide_apps": ["auth"], 
+
+    # FAKE THE ORIGINAL MONOLITH APPS TO RESTORE HEADERS
+    "custom_links": {
+        "Public Portal": [
+            {"name": "View Employee Dashboard", "url": "http://127.0.0.1:8000/", "icon": "fas fa-globe"}
+        ],
+        "User Management": [
+            {"name": "Groups", "url": "http://127.0.0.1:8001/admin/auth/group/", "icon": "fas fa-users"},
+            {"name": "Users", "url": "http://127.0.0.1:8001/admin/auth/user/", "icon": "fas fa-user"}
+        ],
+        "events": [
+            {"name": "Registrations", "url": "http://127.0.0.1:8003/admin/", "icon": "fas fa-clipboard-list"}
+        ],
+        "Broadcasts Management": [
+            {"name": "Notifications", "url": "http://127.0.0.1:8000/", "icon": "fas fa-bell"},
+            {"name": "Broadcast Center", "url": "http://127.0.0.1:8000/", "icon": "fas fa-bullhorn"}
+        ],
+        "CSR Operations": [
+            {"name": "Scan Ticket", "url": "http://127.0.0.1:8000/", "icon": "fas fa-qrcode"}
+        ]
+    },
+
+    "icons": {
+        "events.Activity": "fas fa-calendar-alt",
+        "events.NGO": "fas fa-building",
+    },
+    
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+}
+
+# --- YOUR ORIGINAL UI TWEAKS (Restores the 300px sidebar width!) ---
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": False,
+    "accent": "accent-primary",
+    "navbar": "navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "default",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    },
+    "sidebar_width": 300 
+}
