@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Login - CSR Connect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* 1. THE FULL PAGE BACKGROUND */
+        body {
+            /* Ensure the path matches where you saved the image! */
+            background: url('{% static "images/cloudbackground.jpg" %}') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* 2. THE LOGIN CARD */
+        .login-card {
+            max-width: 900px;
+            width: 100%;
+            border: none;
+            border-radius: 1rem;
+            /* Stronger shadow and a 95% white background so it stands out against the colorful art */
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.2);
+            background-color: rgba(255, 255, 255, 0.95); 
+            overflow: hidden;
+        }
+        
+        /* 3. THE LEFT BRANDING PANEL */
+        .brand-panel {
+            /* Restored the clean corporate blue gradient so the white text is easy to read */
+            background: linear-gradient(135deg, rgba(44, 62, 80, 0.9) 0%, rgba(52, 152, 219, 0.9) 100%);
+            color: white;
+            padding: 4rem 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        /* 4. FORM STYLING */
+        .form-panel {
+            padding: 4rem 3rem;
+        }
+        .form-floating > label {
+            color: #6c757d;
+        }
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        }
+    </style>
+</head>
+<body class="vh-100 d-flex justify-content-center align-items-center">
+
+    <div class="container d-flex justify-content-center">
+        <div class="card login-card">
+            <div class="row g-0">
+                
+                <div class="col-md-6 brand-panel d-none d-md-flex">
+                    <h2 class="fw-bold mb-3">Make an Impact.</h2>
+                    <p class="lead mb-4" style="opacity: 0.9;">
+                        Join our annual Service Day initiative. Log in to secure your volunteer slots, manage your registrations, and help make a difference in our community.
+                    </p>
+                    <div>
+                        <span class="badge bg-white text-dark py-2 px-3 rounded-pill shadow-sm">
+                            Corporate Social Responsibility
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-md-6 form-panel">
+                    <div class="text-center text-md-start mb-4">
+                        <h3 class="fw-bold text-dark mb-1">Staff Portal</h3>
+                        <p class="text-muted small">Please enter your credentials to continue.</p>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} py-2 px-3 small rounded-3 shadow-sm" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST" action="{% url 'gateway_login' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ next }}">
+
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control bg-light border-0" id="username" name="username" placeholder="Username" required autofocus>
+                            <label for="username">Username</label>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="password" class="form-control bg-light border-0" id="password" name="password" placeholder="Password" required>
+                            <label for="password">Password</label>
+                        </div>
+
+                        <div class="d-grid gap-2 mb-4">
+                            <button class="btn btn-success btn-lg fw-bold shadow-sm" type="submit">Sign In</button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <a href="/" class="text-decoration-none text-muted small hover-primary">
+                                &larr; Back to Opportunities
+                            </a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

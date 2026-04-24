@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraIT CSR Service Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card-table { border: none; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.05); overflow: hidden; }
+        .table thead th { background-color: #2c3e50; color: white; font-weight: 500; text-transform: uppercase; font-size: 0.85rem; padding: 15px; }
+        .table tbody td { vertical-align: middle; padding: 15px; border-bottom: 1px solid #eee; }
+        .cutoff-badge { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-5">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">AuraIT - CSR</a>
+            <div class="d-flex align-items-center text-white">
+                {% if user.is_authenticated %}
+                    
+                    <a href="#" class="btn btn-outline-secondary btn-sm me-4 text-white border-secondary position-relative">
+                        🔔 Notifications
+                        {% if unread_notif_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ unread_notif_count }}
+                            </span>
+                        {% endif %}
+                    </a>
+
+                    {% if is_admin_user %}
+                        <a href="http://127.0.0.1:8002/admin/" target="_blank" class="btn btn-warning btn-sm me-3 fw-bold text-dark shadow-sm">⚙️ Admin Panel</a>
+                    {% endif %}
+
+                    <span class="me-3">Welcome, <strong>{{ user.username }}</strong></span>
+                    
+                    <form action="{% url 'gateway_logout' %}" method="POST" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'gateway_login' %}" class="btn btn-primary btn-sm">Staff Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        
+        {% if not user.is_authenticated %}
+        <div class="p-5 mb-5 bg-white rounded-4 shadow-sm border text-center">
+            <h1 class="display-5 fw-bold text-dark mb-3">Make a Difference Today</h1>
+            <div class="col-lg-8 mx-auto">
+                <p class="lead text-muted mb-4">
+                    Welcome to our annual Service Day portal! This initiative allows employees to contribute their time and skills to participating NGOs. Browse the available opportunities below, and log in to secure your volunteer slot.
+                </p>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <a href="{% url 'gateway_login' %}" class="btn btn-primary btn-lg px-5 shadow-sm">Staff Login to Register</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-success bg-success bg-opacity-10 border-0 shadow-sm rounded-4 mb-5 p-4" role="alert">
+            <h4 class="alert-heading fw-bold text-success mb-1">Welcome back, {{ user.first_name|default:user.username|title }}!</h4>
+            <p class="mb-0 text-success opacity-75">Ready to volunteer? Review your current registrations or sign up for new opportunities below.</p>
+        </div>
+        {% endif %}
+
+        <div class="row align-items-center mb-4">
+            <div class="col">
+                <h2 class="fw-bold text-dark mb-1">Service Day Opportunities</h2>
+                <p class="text-muted mb-0">Browse and register for upcoming CSR activities.</p>
+            </div>
+            <div class="col-auto">
+                <span class="badge bg-primary rounded-pill px-3 py-2">{{ activities|length }} Activities Found</span>
+            </div>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="card card-table bg-white">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 35%;">Activity</th>
+                            <th style="width: 15%;">Location</th>
+                            <th style="width: 25%;">Schedule</th>
+                            <th style="width: 10%;">Slots</th>
+                            <th style="width: 15%; text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in activities %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-dark">{{ activity.service_type }}</div>
+                                <div class="text-muted small">Hosted by: {{ activity.ngo_name }}</div>
+                            </td>
+                            <td>{{ activity.location|default:"TBA" }}</td>
+                            <td>
+                                <div>{{ activity.event_date }} at {{ activity.start_time }}</div>
+                                <span class="badge bg-light text-danger border border-danger mt-1 cutoff-badge">
+                                    Cutoff: {{ activity.cutoff_date|date:"M d, H:i" }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if activity.seats_available > 0 %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill">
+                                        {{ activity.seats_available }} / {{ activity.max_employees }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">FULL</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if user.is_authenticated %}
+                                    {% if now > activity.cutoff_date %}
+                                        <button class="btn btn-secondary btn-sm w-100" disabled>Closed</button>
+                                    
+                                    {% elif activity.id in user_registered_ids %}
+                                        <div class="d-flex gap-1">
+                                            <a href="#" class="btn btn-info btn-sm w-50 text-white" title="View QR Ticket">Ticket</a>
+                                            
+                                            <button type="button" class="btn-outline-danger btn btn-sm w-50" data-bs-toggle="modal" data-bs-target="#withdrawModal{{ activity.id }}">
+                                                Withdraw
+                                            </button>
+                                        </div>
+
+                                        <div class="modal fade" id="withdrawModal{{ activity.id }}" tabindex="-1" aria-labelledby="withdrawModalLabel{{ activity.id }}" aria-hidden="true">
+                                          <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content text-start">
+                                              <div class="modal-header bg-danger text-white">
+                                                <h5 class="modal-title fw-bold" id="withdrawModalLabel{{ activity.id }}">Confirm Withdrawal</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                              </div>
+                                              <div class="modal-body">
+                                                <p>Are you sure you want to withdraw from <strong>{{ activity.service_type }}</strong>?</p>
+                                                <p class="small text-muted mb-0">If you withdraw, your slot will be immediately released and made available to other employees. This action cannot be undone.</p>
+                                              </div>
+                                              <div class="modal-footer border-0">
+                                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Keep My Slot</button>
+                                                
+                                                <form action="{% url 'gateway_toggle' %}" method="POST" class="m-0">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="activity_id" value="{{ activity.id }}">
+                                                    <input type="hidden" name="action" value="WITHDRAW">
+                                                    <button type="submit" class="btn btn-danger btn-sm px-4">Yes, Withdraw</button>
+                                                </form>
+
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                    {% elif activity.seats_available == 0 %}
+                                        <button class="btn btn-light text-muted btn-sm w-100 border" disabled>Waitlist</button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-success btn-sm w-100 shadow-sm" data-bs-toggle="modal" data-bs-target="#consentModal{{ activity.id }}">
+                                            Register
+                                        </button>
+
+                                        <div class="modal fade" id="consentModal{{ activity.id }}" tabindex="-1" aria-labelledby="consentModalLabel{{ activity.id }}" aria-hidden="true">
+                                          <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content text-start">
+                                              <div class="modal-header bg-light">
+                                                <h5 class="modal-title fw-bold" id="consentModalLabel{{ activity.id }}">Terms of Participation</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                              </div>
+                                              <div class="modal-body">
+                                                <p>You are requesting to register for <strong>{{ activity.service_type }}</strong> at {{ activity.ngo_name }}.</p>
+                                                <p class="small text-muted mb-2">By proceeding with this registration, you agree to the following:</p>
+                                                <ul class="small text-muted">
+                                                    <li>I commit to attending this Service Day activity on the scheduled date.</li>
+                                                    <li>I understand that cancellations must be made before the cut-off date to allow others to join.</li>
+                                                    <li>I agree to adhere to the company's Code of Conduct and represent the organization professionally.</li>
+                                                    <li>I consent to the use of photos/videos taken during the event for internal CSR reporting.</li>
+                                                </ul>
+                                                
+                                                <div class="form-check border p-3 rounded bg-light mt-4">
+                                                    <input class="form-check-input" type="checkbox" id="consentCheck{{ activity.id }}" onchange="document.getElementById('submitBtn{{ activity.id }}').disabled = !this.checked;">
+                                                    <label class="form-check-label small fw-bold text-dark" for="consentCheck{{ activity.id }}">
+                                                        I have read and agree to the terms of participation.
+                                                    </label>
+                                                </div>
+                                              </div>
+                                              <div class="modal-footer border-0">
+                                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                
+                                                <form action="{% url 'gateway_toggle' %}" method="POST" class="m-0">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="activity_id" value="{{ activity.id }}">
+                                                    <input type="hidden" name="action" value="REGISTER">
+                                                    <button type="submit" class="btn btn-success btn-sm px-4" id="submitBtn{{ activity.id }}" disabled>Agree & Continue</button>
+                                                </form>
+
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <a href="{% url 'gateway_login' %}" class="btn btn-link btn-sm text-decoration-none">Login</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <h4 class="text-muted">No activities available</h4>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

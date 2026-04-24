@@ -1,0 +1,191 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+
+{% block extrastyle %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        /* Override Django Admin's default padding */
+        #content {
+            padding: 20px !important;
+            background-color: #f4f6f9;
+        }
+        .card {
+            border-radius: 8px;
+            border: none;
+        }
+        caption {
+            caption-side: top !important;
+            padding-top: 8px;
+        }
+
+        /* NEW: Enterprise Card Borders */
+        .border-left-primary { border-left: 5px solid #0d6efd !important; }
+        .border-left-success { border-left: 5px solid #198754 !important; }
+        .border-left-warning { border-left: 5px solid #ffc107 !important; }
+        .border-left-info { border-left: 5px solid #0dcaf0 !important; } /* Added for the new 4th card */
+        
+        /* NEW: Clean Table Styling */
+        .custom-table tbody tr {
+            border-bottom: 1px solid #f4f4f4;
+            transition: background-color 0.2s;
+        }
+        .custom-table tbody tr:hover { background-color: #f8f9fa; }
+        .custom-table tbody tr:last-child { border-bottom: none; }
+        .custom-table td { padding: 16px 8px; }
+        .custom-table td:first-child { padding-left: 24px; font-weight: 500;}
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4">
+        <h2 class="fw-bold text-dark"><i class="fas fa-tachometer-alt me-2 text-secondary"></i> System Overview</h2>
+    </div>
+
+    <div class="row g-4 mb-4">
+        
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-left-primary h-100 rounded-lg">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted text-uppercase fw-bold mb-1" style="letter-spacing: 1px; font-size: 0.8rem;">Total Staff</h6>
+                        <h3 class="mb-0 fw-bold text-dark">{{ total_users }}</h3>
+                    </div>
+                    <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 55px; height: 55px;">
+                        <i class="fas fa-users fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-left-success h-100 rounded-lg">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted text-uppercase fw-bold mb-1" style="letter-spacing: 1px; font-size: 0.8rem;">Active Events</h6>
+                        <h3 class="mb-0 fw-bold text-dark">{{ active_events }}</h3>
+                    </div>
+                    <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 55px; height: 55px;">
+                        <i class="fas fa-seedling fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-left-warning h-100 rounded-lg">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted text-uppercase fw-bold mb-1" style="letter-spacing: 1px; font-size: 0.8rem;">Total Activities</h6>
+                        <h3 class="mb-0 fw-bold text-dark">{{ total_events }}</h3>
+                    </div>
+                    <div class="bg-warning text-dark rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 55px; height: 55px;">
+                        <i class="fas fa-calendar-alt fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-left-info h-100 rounded-lg">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted text-uppercase fw-bold mb-1" style="letter-spacing: 1px; font-size: 0.8rem;">Total Capacity</h6>
+                        <h3 class="mb-0 fw-bold text-dark">{{ total_capacity }} slots</h3>
+                    </div>
+                    <div class="bg-info text-white rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 55px; height: 55px;">
+                        <i class="fas fa-chart-pie fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4 rounded-lg">
+        <div class="card-header bg-white py-3 border-bottom">
+            <h6 class="m-0 fw-bold text-dark"><i class="fas fa-chart-line me-2 text-primary"></i> Engagement Trends</h6>
+        </div>
+        <div class="card-body p-4">
+            <div class="chart-container">
+                <canvas id="dashboardChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-5 rounded-lg">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h6 class="m-0 fw-bold text-dark"><i class="fas fa-list me-2 text-primary"></i> Recent Opportunities</h6>
+            <a href="/admin/service_dashboard/activity/add/" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm fw-bold">+ New Event</a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 custom-table">
+                    <thead class="bg-light text-muted">
+                        <tr>
+                            <th class="px-4 py-3 border-0 text-uppercase" style="font-size: 0.85rem;">Event</th>
+                            <th class="py-3 border-0 text-uppercase" style="font-size: 0.85rem;">Date</th>
+                            <th class="py-3 border-0 text-uppercase" style="font-size: 0.85rem;">Availability</th>
+                            <th class="text-center py-3 border-0 text-uppercase" style="font-size: 0.85rem;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in upcoming_events %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-dark">{{ event.service_type }}</div>
+                                <div class="text-muted small" style="font-size: 0.75rem;">{{ event.ngo.name }}</div>
+                            </td>
+                            <td class="text-muted">{{ event.event_date|date:"d M Y" }}</td>
+                            <td>
+                                <span class="badge rounded-pill {% if event.seats_available > 0 %}bg-success{% else %}bg-danger{% endif %} px-3 py-2 shadow-sm">
+                                    {{ event.seats_available }} slots
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-dark fw-bold rounded-pill px-3" title="View QR Code">
+                                    <i class="fas fa-qrcode me-1"></i> QR
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="fas fa-folder-open fs-1 text-light mb-3"></i><br>
+                                No upcoming events found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('dashboardChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Sign-ups',
+                data: [5, 12, 19, 8],
+                borderColor: '#0d6efd',
+                tension: 0.3,
+                fill: true,
+                backgroundColor: 'rgba(13, 110, 253, 0.1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } }
+        }
+    });
+</script>
+{% endblock %}
+

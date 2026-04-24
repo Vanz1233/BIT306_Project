@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Ticket - CSR Connect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #f4f6f9; /* Matches your dashboard background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
+        
+        /* The main ticket container */
+        .ticket-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 1rem 3rem rgba(0,0,0,0.08);
+            max-width: 400px;
+            margin: auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Top Header Area */
+        .ticket-top {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        /* Middle Area with QR Code & Cutouts */
+        .ticket-middle {
+            position: relative;
+            background: #fff;
+            padding: 2.5rem 2rem 2rem 2rem;
+            text-align: center;
+            border-bottom: 2px dashed #e9ecef;
+        }
+
+        /* CSS Trick: The Cutout Notches on the sides */
+        .ticket-middle::before, .ticket-middle::after {
+            content: '';
+            position: absolute;
+            bottom: -15px; /* Centers the circle on the dashed line */
+            width: 30px;
+            height: 30px;
+            background-color: #f4f6f9; /* Matches the body background to look transparent */
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: inset 0px 3px 5px rgba(0,0,0,0.02);
+        }
+        .ticket-middle::before { left: -15px; }
+        .ticket-middle::after { right: -15px; }
+
+        /* Bottom Details Area */
+        .ticket-bottom {
+            background: #fff;
+            padding: 2rem;
+        }
+
+        /* Clean typography for the data */
+        .detail-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #adb5bd;
+            letter-spacing: 1px;
+            margin-bottom: 0.25rem;
+            font-weight: 700;
+        }
+        .detail-value {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.05rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container min-vh-100 d-flex flex-column justify-content-center align-items-center py-5">
+        
+        <div class="w-100">
+            <div class="ticket-card">
+                
+                <div class="ticket-top">
+                    <h5 class="fw-bold mb-0 text-uppercase" style="letter-spacing: 2px;">Official Event Pass</h5>
+                    <p class="text-white-50 small mb-0 mt-1">CSR Connect Initiative</p>
+                </div>
+
+                <div class="ticket-middle">
+                    <div class="p-3 bg-white rounded-4 shadow-sm border border-light d-inline-block mb-3">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=CSR-Checkin-{{ user.username }}-Event{{ event.id }}" alt="QR Code" class="img-fluid rounded">
+                    </div>
+                    <p class="text-muted small fw-bold mb-0">SCAN TO CHECK-IN</p>
+                </div>
+
+                <div class="ticket-bottom">
+                    <h3 class="fw-bold text-center mb-4 text-dark">{{ event.name }}</h3>
+
+                    <div class="row g-4 mb-2">
+                        <div class="col-6">
+                            <div class="detail-label">Date</div>
+                            <div class="detail-value">
+                                {{ event.event_date|date:"M d, Y"|default:"Feb 28, 2026" }}
+                            </div>
+                        </div>
+                        <div class="col-6 text-end">
+                            <div class="detail-label">Location</div>
+                            <div class="detail-value">{{ event.location|default:"Subang" }}</div>
+                        </div>
+                        <div class="col-12 text-center mt-4 pt-3 border-top border-light">
+                            <div class="detail-label">Registered Attendee</div>
+                            <div class="detail-value fs-5 text-primary">
+                                {{ user.first_name|default:user.username|title }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="text-center mt-5">
+                <a href="/" class="btn btn-outline-secondary px-4 py-2 rounded-pill shadow-sm fw-bold">
+                    &larr; Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
