@@ -122,3 +122,8 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+
+# --- MICROSERVICE COOKIE ISOLATION ---
+# Prevents other local ports from overwriting the Gateway's cookies
+CSRF_COOKIE_NAME = "gateway_csrf_token"
+SESSION_COOKIE_NAME = "gateway_sessionid"

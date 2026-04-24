@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Registration
 from .serializers import RegistrationSerializer
+import requests  # <-- NEW: Imported requests for the microservice ping
 
 class RegistrationCreateView(generics.CreateAPIView):
     """API Endpoint to allow an employee to register or withdraw"""
@@ -34,6 +35,17 @@ class RegistrationCreateView(generics.CreateAPIView):
             return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
 
         registration.save()
+
+        # --- NEW: THE MICROSERVICE PING ---
+        # Throw the paper airplane to Port 8002 to update its integer field!
+        try:
+            requests.post('http://127.0.0.1:8002/api/events/update-seats/', json={
+                'activity_id': activity_id,
+                'action': action
+            }, timeout=2)
+        except requests.exceptions.RequestException:
+            print("Warning: Could not reach Port 8002 to update the seat counter.")
+
         return Response({
             'message': message, 
             'status': registration.status,

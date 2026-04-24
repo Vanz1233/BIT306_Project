@@ -125,6 +125,8 @@ JAZZMIN_SETTINGS = {
     "site_header": "AuraIT Management",
     "site_brand": "AuraIT Management",
     
+    "theme": "litera", 
+
     "topmenu_links": [
         {
             "name": " Logout", 
@@ -132,30 +134,6 @@ JAZZMIN_SETTINGS = {
             "classes": "btn btn-danger text-white fw-bold", 
         }
     ],
-    
-    "theme": "litera", 
-    "hide_apps": ["auth"], 
-
-    # FAKE THE ORIGINAL MONOLITH APPS TO RESTORE HEADERS
-    "custom_links": {
-        "Public Portal": [
-            {"name": "View Employee Dashboard", "url": "http://127.0.0.1:8000/", "icon": "fas fa-globe"}
-        ],
-        "User Management": [
-            {"name": "Groups", "url": "http://127.0.0.1:8001/admin/auth/group/", "icon": "fas fa-users"},
-            {"name": "Users", "url": "http://127.0.0.1:8001/admin/auth/user/", "icon": "fas fa-user"}
-        ],
-        "events": [
-            {"name": "Registrations", "url": "http://127.0.0.1:8003/admin/", "icon": "fas fa-clipboard-list"}
-        ],
-        "Broadcasts Management": [
-            {"name": "Notifications", "url": "http://127.0.0.1:8000/", "icon": "fas fa-bell"},
-            {"name": "Broadcast Center", "url": "http://127.0.0.1:8000/", "icon": "fas fa-bullhorn"}
-        ],
-        "CSR Operations": [
-            {"name": "Scan Ticket", "url": "http://127.0.0.1:8000/", "icon": "fas fa-qrcode"}
-        ]
-    },
 
     "icons": {
         "events.Activity": "fas fa-calendar-alt",

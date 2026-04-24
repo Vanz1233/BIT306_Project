@@ -222,7 +222,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 # Note: In a real production environment with HTTPS, these should be True. 
 # We keep them False locally so your login still works on HTTP (127.0.0.1).
 SESSION_COOKIE_SECURE = False 
-CSRF_COOKIE_SECURE = False   
+CSRF_COOKIE_SECURE = False  
 
 # Topic 7.2.b: Prevent Session Hijacking (Expiry)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True # Logs user out if they close the tab
