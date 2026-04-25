@@ -185,7 +185,6 @@ def user_notifications(request):
         'user': mock_user
     })
 
-
 def frontend_login(request):
     """Takes the HTML form and asks the User Service to verify it."""
     if request.method == 'POST':
@@ -200,16 +199,18 @@ def frontend_login(request):
             })
             
             if response.status_code == 200:
-                # Passwords match! Save the user data into the Gateway's session.
                 request.session['user_data'] = response.json()
                 messages.success(request, "Login successful!")
                 return redirect('dashboard')
             else:
-                messages.error(request, "Invalid username or password.")
+                # DIAGNOSTIC FIX: Show EXACTLY what the backend is saying!
+                error_details = f"Backend Error {response.status_code}: {response.text}"
+                messages.error(request, error_details)
+                print(error_details) # Also prints to your Render logs
+                
         except requests.exceptions.ConnectionError:
             messages.error(request, "User Service is currently down! Cannot login.")
             
-    # If they just click "Login", show them your old login HTML page
     return render(request, 'accounts/login.html') 
 
 
