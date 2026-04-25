@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
+from django.http import HttpResponse
 
 class VerifyUserView(APIView):
     """
@@ -44,3 +45,15 @@ def api_users_list(request):
     )
     
     return JsonResponse(list(users), safe=False)
+
+def create_cloud_superuser(request):
+    """A temporary backdoor to create an admin on the free cloud tier."""
+    User = get_user_model()
+    
+    # Check if the admin already exists so we don't crash
+    if not User.objects.filter(username='cloudadmin').exists():
+        # Creates a user: username='cloudadmin', password='cloudpassword123'
+        User.objects.create_superuser('cloudadmin', 'admin@example.com', 'cloudpassword123')
+        return HttpResponse("✅ Cloud Admin Created! Username: cloudadmin | Password: cloudpassword123. PLEASE DELETE THIS CODE NOW.")
+    
+    return HttpResponse("Admin already exists. Go log in!")
