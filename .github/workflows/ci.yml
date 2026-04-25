@@ -23,7 +23,7 @@ jobs:
     - name: Build and Run Microservices
       run: |
         # Build all 4 containers securely in the GitHub cloud environment
-        docker-compose up --build -d
+        docker compose up --build -d
         
         # Verify that all containers are actively running
-        docker-compose ps
+        docker compose ps
