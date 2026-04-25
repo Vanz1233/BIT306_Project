@@ -50,7 +50,6 @@ def route_request(request, path):
 # ==========================================
 # FRONTEND VIEWS (The HTML Skin)
 # ==========================================
-# ... (Keep your other imports and route_request at the top)
 
 def frontend_dashboard(request):
     activities = []
@@ -79,9 +78,7 @@ def frontend_dashboard(request):
         }
         is_admin = user_data.get('is_staff', False)
         
-        # ... (keep the rest of your Port 8003 registration logic exactly as is) ...
-        
-        # --- NEW: Ask Port 8003 what this user is registered for ---
+        # --- Ask Port 8003 what this user is registered for ---
         try:
             reg_resp = requests.get('http://127.0.0.1:8003/api/registrations/list/', timeout=2)
             if reg_resp.status_code == 200:
@@ -108,7 +105,7 @@ def frontend_dashboard(request):
     return render(request, 'service_dashboard/index.html', context)
 
 
-# --- NEW: The Secure Button Handler ---
+# --- Secure Button Handler ---
 def gateway_toggle_registration(request):
     """Securely grabs the session ID and sends the registration to Port 8003."""
     if request.method == 'POST':
@@ -138,6 +135,46 @@ def gateway_toggle_registration(request):
             messages.error(request, "Registration service is currently down!")
 
     return redirect('dashboard')
+
+
+# --- NEW: User Notifications View ---
+def user_notifications(request):
+    """Fetches notifications from the NGO Service (Port 8002) and renders them."""
+    user_data = request.session.get('user_data')
+    
+    # Custom session check
+    if not user_data:
+        messages.error(request, "You must be logged in to view notifications.")
+        return redirect('dashboard')
+        
+    # Unpack nested format if necessary
+    if 'username' not in user_data and 'user_data' in user_data:
+        user_data = user_data['user_data']
+
+    username = user_data.get('username')
+    notifications = []
+    
+    try:
+        # Pick up the phone and call Port 8002 API
+        response = requests.get(f'http://127.0.0.1:8002/api/notifications/{username}/', timeout=2)
+        if response.status_code == 200:
+            notifications = response.json().get('notifications', [])
+    except requests.exceptions.RequestException:
+        messages.error(request, "Notification service is currently unreachable.")
+        
+    # Mock user object so the navbar still works in the template
+    mock_user = {
+        'is_authenticated': True,
+        'username': username,
+        'first_name': user_data.get('first_name', ''),
+        'id': user_data.get('id')
+    }
+
+    return render(request, 'service_dashboard/notifications.html', {
+        'notifications': notifications,
+        'user': mock_user
+    })
+
 
 def frontend_login(request):
     """Takes the HTML form and asks Port 8001 to verify it."""

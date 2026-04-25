@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 
 class NGO(models.Model):
     name = models.CharField(max_length=200)
@@ -50,3 +51,14 @@ class Activity(models.Model):
     
     class Meta:
         verbose_name_plural = "Activities"
+
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title if getattr(self, 'title', None) else "Unnamed Notification"

@@ -18,11 +18,11 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-5">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">AuraIT - CSR</a>
+            <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}">AuraIT - CSR</a>
             <div class="d-flex align-items-center text-white">
                 {% if user.is_authenticated %}
                     
-                    <a href="#" class="btn btn-outline-secondary btn-sm me-4 text-white border-secondary position-relative">
+                    <a href="{% url 'user_notifications' %}" class="btn btn-outline-secondary btn-sm me-4 text-white border-secondary position-relative">
                         🔔 Notifications
                         {% if unread_notif_count > 0 %}
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">

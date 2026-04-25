@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSR Connect</title>
+    <title>AuraIT - CSR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -20,32 +20,28 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="position: relative; z-index: 2000;">
     <div class="container-fluid">
         
-        <a class="navbar-brand fw-bold ms-5 me-auto" href="{% url 'dashboard' %}">CSR Connect</a>
+        <a class="navbar-brand fw-bold ms-5 me-auto" href="{% url 'dashboard' %}">AuraIT - CSR</a>
 
         <div class="d-flex align-items-center text-white me-5">
             {% if user.is_authenticated %}
-                <a href="{% url 'notifications:user_list' %}" class="btn btn-outline-secondary btn-sm me-3 text-white border-secondary">
+                <a href="{% url 'user_notifications' %}" class="btn btn-outline-secondary btn-sm me-3 text-white border-secondary">
                     🔔 Notifications
-
-                    {% if unread_notif_count > 0 %}
-                        <span class="badge bg-danger rounded-pill ms-1">{{ unread_notif_count }}</span>
-                    {% endif %}   
                 </a>
 
-                {% if user.is_staff or user.is_superuser %}
-                <a href="{% url 'admin_dashboard' %}" class="btn btn-danger btn-sm me-3 shadow-sm">
-                    ⚡ Admin Dashboard
+                {% if is_admin_user %}
+                <a href="http://127.0.0.1:8002/admin/" class="btn btn-warning btn-sm me-3 shadow-sm text-dark fw-bold">
+                    ⚙️ Admin Panel
                 </a>
                 {% endif %}
 
                 <span class="me-3">Welcome, <strong>{{ user.username }}</strong></span>
 
-                <form action="{% url 'accounts:logout' %}" method="post" class="d-inline">
+                <form action="{% url 'logout' %}" method="post" class="d-inline">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
                 </form>
             {% else %}
-                <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-sm">Staff Login</a>
+                <a href="{% url 'login' %}" class="btn btn-primary btn-sm">Staff Login</a>
             {% endif %}
         </div>
     </div>

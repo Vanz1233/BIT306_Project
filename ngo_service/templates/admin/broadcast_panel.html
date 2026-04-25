@@ -1,0 +1,100 @@
+{% extends 'admin/base_site.html' %}
+
+{% block extrastyle %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #content {
+            padding: 20px !important;
+            background-color: #f4f6f9;
+        }
+        .card {
+            border-radius: 8px;
+            border: none;
+        }
+    </style>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">Home</a>
+        &rsaquo; Broadcast Center
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-2">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2 fw-bold text-dark">📢 Broadcast Center</h1>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0 fw-bold">Send New Message</h5>
+                </div>
+                <div class="card-body p-4 bg-light bg-opacity-10">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="broadcast" value="true">
+                        
+                        <div class="form-floating mb-3">
+                            <select name="event_id" class="form-select" id="audienceSelect">
+                                <option value="all">🌍 All Employees</option>
+                                {% for event in events %}
+                                    <option value="{{ event.id }}">{{ event.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <label for="audienceSelect">Target Audience</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" name="subject" class="form-control" id="msgSubject" placeholder="Subject" required>
+                            <label for="msgSubject">Subject Line</label>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <textarea name="message" class="form-control" placeholder="Message" id="msgBody" style="height: 150px" required></textarea>
+                            <label for="msgBody">Message Content</label>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Send Broadcast</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-dark">Automated Reminders</h5>
+                </div>
+                <div class="card-body p-0">
+                     <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Event</th>
+                                <th class="text-center">Reminder Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in events %}
+                            <tr>
+                                <td class="ps-4">{{ event.name }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-success">Active</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                             <tr><td colspan="2" class="text-center py-3">No active events.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

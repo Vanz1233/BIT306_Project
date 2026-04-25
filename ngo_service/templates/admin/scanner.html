@@ -1,0 +1,88 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-dark text-white text-center py-3">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="fas fa-qrcode mr-2"></i> CSR Ticket Scanner
+                    </h4>
+                </div>
+                
+                <div class="card-body text-center p-5">
+                    <p class="text-muted mb-4">Point the device camera at the attendee's digital QR pass to verify and check them in.</p>
+
+                    <div class="camera-box mx-auto mb-4 bg-dark rounded d-flex align-items-center justify-content-center position-relative">
+                        <div class="corner top-left"></div>
+                        <div class="corner top-right"></div>
+                        <div class="corner bottom-left"></div>
+                        <div class="corner bottom-right"></div>
+
+                        <span class="text-secondary small fw-bold tracking-wide" style="letter-spacing: 2px;">CAMERA ACTIVE</span>
+
+                        <div class="scan-line"></div>
+                    </div>
+
+                    <hr class="my-4 text-muted">
+
+                    <form method="POST" action="{% url 'scanner_prototype' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="attendee_name" value="Vance Tindoc (VIP Guest)">
+                        
+                        <button type="submit" class="btn btn-success btn-lg px-5 rounded-pill shadow fw-bold">
+                            <i class="fas fa-camera mr-2"></i> Simulate Scan
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Camera Box Styling */
+    .camera-box {
+        width: 100%; 
+        max-width: 320px; 
+        height: 320px; 
+        border: 4px solid #222;
+        overflow: hidden;
+        box-shadow: inset 0px 0px 30px rgba(0,0,0,0.8);
+    }
+
+    /* The Glowing Green Laser */
+    .scan-line {
+        position: absolute;
+        width: 100%;
+        height: 3px;
+        background: rgba(0, 255, 100, 0.9);
+        box-shadow: 0 0 15px rgba(0, 255, 100, 0.8), 0 0 30px rgba(0, 255, 100, 0.6);
+        top: 0;
+        left: 0;
+        animation: scan 2.5s infinite linear alternate;
+    }
+
+    @keyframes scan {
+        0% { top: 5%; opacity: 0.8; }
+        50% { opacity: 1; }
+        100% { top: 95%; opacity: 0.8; }
+    }
+
+    /* Targeting brackets */
+    .corner {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        border-color: rgba(255, 255, 255, 0.4);
+        border-style: solid;
+        border-radius: 4px;
+    }
+    .top-left { top: 20px; left: 20px; border-width: 4px 0 0 4px; }
+    .top-right { top: 20px; right: 20px; border-width: 4px 4px 0 0; }
+    .bottom-left { bottom: 20px; left: 20px; border-width: 0 0 4px 4px; }
+    .bottom-right { bottom: 20px; right: 20px; border-width: 0 4px 4px 0; }
+</style>
+{% endblock %}

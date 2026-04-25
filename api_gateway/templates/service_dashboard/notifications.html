@@ -14,32 +14,27 @@
         </div>
 
         <div class="list-group shadow-sm">
-            <a href="#" class="list-group-item list-group-item-action p-3" aria-current="true">
-                <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1 text-success">Registration Confirmed</h5>
-                    <small>Just now</small>
+            {% for notif in notifications %}
+                <a href="#" class="list-group-item list-group-item-action p-3 {% if not notif.is_read %}bg-white border-primary border-start border-4{% else %}bg-light text-muted{% endif %}" aria-current="true">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1 {% if not notif.is_read %}fw-bold text-primary{% else %}text-dark{% endif %}">
+                            {{ notif.title }}
+                            {% if not notif.is_read %}
+                                <span class="badge bg-primary rounded-pill ms-2" style="font-size: 0.6em;">NEW</span>
+                            {% endif %}
+                        </h5>
+                        <small class="{% if not notif.is_read %}fw-bold text-primary{% else %}text-muted{% endif %}">
+                            {{ notif.created_at }}
+                        </small>
+                    </div>
+                    <p class="mb-1">{{ notif.message }}</p>
+                </a>
+            {% empty %}
+                <div class="list-group-item p-5 text-center bg-white">
+                    <h5 class="text-muted mb-0">You have no new notifications.</h5>
                 </div>
-                <p class="mb-1">You have successfully registered for <strong>Beach Cleanup 2026</strong>.</p>
-                <small class="text-muted">Click to view ticket details.</small>
-            </a>
-
-            <a href="#" class="list-group-item list-group-item-action p-3">
-                <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">Event Reminder</h5>
-                    <small class="text-muted">3 days ago</small>
-                </div>
-                <p class="mb-1">Don't forget the <strong>Soup Kitchen Help</strong> starts at 9:00 AM.</p>
-                <small class="text-muted">Please arrive 10 minutes early.</small>
-            </a>
-
-            <a href="#" class="list-group-item list-group-item-action p-3">
-                <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1 text-danger">Withdrawal Processed</h5>
-                    <small class="text-muted">1 week ago</small>
-                </div>
-                <p class="mb-1">Your slot for <strong>Tree Planting</strong> has been released.</p>
-            </a>
-        </div>
+            {% endfor %}
+            </div>
         
         <div class="text-center mt-3 text-muted small">
             End of notifications

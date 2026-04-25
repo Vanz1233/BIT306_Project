@@ -1,0 +1,29 @@
+name: Microservices CI/CD Pipeline
+
+on:
+  push:
+    # Now it listens specifically to your new branch!
+    branches: [ "topic-11-microservices", "main", "master" ] 
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+# ... (leave the rest of your steps below exactly the same) ...
+
+    steps:
+    - name: Checkout Repository Code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build and Run Microservices
+      run: |
+        # Build all 4 containers securely in the GitHub cloud environment
+        docker-compose up --build -d
+        
+        # Verify that all containers are actively running
+        docker-compose ps
