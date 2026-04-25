@@ -1,18 +1,28 @@
+import os
 import requests
+import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-import json
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.contrib import messages
 
+# ==========================================
+# MICROSERVICE CLOUD ROUTING VARIABLES
+# ==========================================
+# Grabs the Render URLs if they exist. Defaults to your laptop if they don't!
+# rstrip('/') ensures we don't accidentally create double-slashes in our URLs.
+USER_SERVICE_URL = os.environ.get('USER_SERVICE_URL', 'http://127.0.0.1:8001').rstrip('/')
+NGO_SERVICE_URL = os.environ.get('NGO_SERVICE_URL', 'http://127.0.0.1:8002').rstrip('/')
+REGISTRATION_SERVICE_URL = os.environ.get('REGISTRATION_SERVICE_URL', 'http://127.0.0.1:8003').rstrip('/')
+
 @csrf_exempt
 def route_request(request, path):
-    # The map of our Microservices
+    # The map of our Microservices using our new Cloud Variables
     SERVICES = {
-        'users': 'http://127.0.0.1:8001',
-        'ngos': 'http://127.0.0.1:8002',
-        'registrations': 'http://127.0.0.1:8003',
+        'users': USER_SERVICE_URL,
+        'ngos': NGO_SERVICE_URL,
+        'registrations': REGISTRATION_SERVICE_URL,
     }
 
     # Figure out which service they want (e.g., 'ngos' from 'ngos/activities/')
@@ -54,7 +64,7 @@ def route_request(request, path):
 def frontend_dashboard(request):
     activities = []
     try:
-        response = requests.get('http://127.0.0.1:8002/api/ngos/activities/')
+        response = requests.get(f'{NGO_SERVICE_URL}/api/ngos/activities/')
         if response.status_code == 200:
             activities = response.json()
     except requests.exceptions.ConnectionError:
@@ -78,9 +88,9 @@ def frontend_dashboard(request):
         }
         is_admin = user_data.get('is_staff', False)
         
-        # --- Ask Port 8003 what this user is registered for ---
+        # --- Ask the Registration Service what this user is registered for ---
         try:
-            reg_resp = requests.get('http://127.0.0.1:8003/api/registrations/list/', timeout=2)
+            reg_resp = requests.get(f'{REGISTRATION_SERVICE_URL}/api/registrations/list/', timeout=2)
             if reg_resp.status_code == 200:
                 all_regs = reg_resp.json()
                 # Filter out just the active activity IDs for this specific user
@@ -107,7 +117,7 @@ def frontend_dashboard(request):
 
 # --- Secure Button Handler ---
 def gateway_toggle_registration(request):
-    """Securely grabs the session ID and sends the registration to Port 8003."""
+    """Securely grabs the session ID and sends the registration to the Registration Service."""
     if request.method == 'POST':
         user_data = request.session.get('user_data')
         
@@ -119,8 +129,8 @@ def gateway_toggle_registration(request):
         action = request.POST.get('action') # Will be 'REGISTER' or 'WITHDRAW'
 
         try:
-            # Forward the secure package to Port 8003
-            response = requests.post('http://127.0.0.1:8003/api/registrations/toggle/', json={
+            # Forward the secure package to the Registration Service
+            response = requests.post(f'{REGISTRATION_SERVICE_URL}/api/registrations/toggle/', json={
                 'employee_id': user_data['id'],
                 'activity_id': int(activity_id),
                 'action': action
@@ -139,7 +149,7 @@ def gateway_toggle_registration(request):
 
 # --- NEW: User Notifications View ---
 def user_notifications(request):
-    """Fetches notifications from the NGO Service (Port 8002) and renders them."""
+    """Fetches notifications from the NGO Service and renders them."""
     user_data = request.session.get('user_data')
     
     # Custom session check
@@ -155,8 +165,8 @@ def user_notifications(request):
     notifications = []
     
     try:
-        # Pick up the phone and call Port 8002 API
-        response = requests.get(f'http://127.0.0.1:8002/api/notifications/{username}/', timeout=2)
+        # Pick up the phone and call NGO Service API
+        response = requests.get(f'{NGO_SERVICE_URL}/api/notifications/{username}/', timeout=2)
         if response.status_code == 200:
             notifications = response.json().get('notifications', [])
     except requests.exceptions.RequestException:
@@ -177,14 +187,14 @@ def user_notifications(request):
 
 
 def frontend_login(request):
-    """Takes the HTML form and asks Port 8001 to verify it."""
+    """Takes the HTML form and asks the User Service to verify it."""
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         
         try:
-            # Send the credentials to our Security Guard (Port 8001)
-            response = requests.post('http://127.0.0.1:8001/api/users/verify/', json={
+            # Send the credentials to our Security Guard (User Service)
+            response = requests.post(f'{USER_SERVICE_URL}/api/users/verify/', json={
                 'username': username,
                 'password': password
             })
@@ -208,5 +218,4 @@ def frontend_logout(request):
     request.session.flush()
     messages.success(request, "You have been successfully logged out.")
     return redirect('dashboard')
-    
     
