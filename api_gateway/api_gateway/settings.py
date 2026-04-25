@@ -14,6 +14,9 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
+# Tell Django that forms submitted from your Render URL are safe!
+# The wildcard *.onrender.com covers your app even if you change the name later.
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com', 'https://api-gateway-service-gkli.onrender.com']
 
 # Application definition
 
