@@ -9,4 +9,5 @@ RUN pip install -r requirements.txt
 # Copy the project code
 COPY . .
 
-# Note: We don't put the CMD here. We will orchestrate that in the docker-compose file!
+# Start the Registration Service on Port 8003
+CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8003"]

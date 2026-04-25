@@ -9,4 +9,5 @@ RUN pip install -r requirements.txt
 # Copy the project code
 COPY . .
 
-# Note: We don't put the CMD here. We will orchestrate that in the docker-compose file!
+# Start the Gateway on Port 8000
+CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
