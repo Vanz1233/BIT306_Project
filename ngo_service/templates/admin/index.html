@@ -165,8 +165,8 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         
-        // 1. Fetch Total Users from Port 8001
-        fetch('http://127.0.0.1:8001/api/users/list/')
+        // 1. Fetch Total Users from Cloud User Service
+        fetch('https://user-service-app-correctone.onrender.com/api/users/list/')
             .then(response => response.json())
             .then(users => {
                 document.getElementById('total-users-count').innerText = users.length;
@@ -176,8 +176,8 @@
                 console.error("User Service is unreachable:", error);
             });
 
-        // 2. Fetch Registrations from Port 8003 and build the Chart
-        fetch('http://127.0.0.1:8003/api/registrations/stats/')
+        // 2. Fetch Registrations from Cloud Registration Service and build the Chart
+        fetch('https://registration-service-app-[YOUR-ID].onrender.com/api/registrations/stats/')
             .then(response => response.json())
             .then(data => {
                 const regs = data.registrations;
