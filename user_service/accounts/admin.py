@@ -1,6 +1,15 @@
+import os
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+
+# ==========================================
+# CLOUD ENVIRONMENT VARIABLES
+# ==========================================
+API_GATEWAY_URL = os.environ.get('API_GATEWAY_URL', 'http://127.0.0.1:8000').rstrip('/')
+USER_SERVICE_URL = os.environ.get('USER_SERVICE_URL', 'http://127.0.0.1:8001').rstrip('/')
+NGO_SERVICE_URL = os.environ.get('NGO_SERVICE_URL', 'http://127.0.0.1:8002').rstrip('/')
+REGISTRATION_SERVICE_URL = os.environ.get('REGISTRATION_SERVICE_URL', 'http://127.0.0.1:8003').rstrip('/')
 
 # 1. Unregister Django's default User admin
 admin.site.unregister(User)
@@ -38,9 +47,8 @@ original_get_app_list = admin.site.get_app_list
 
 def universal_get_app_list(request, app_label=None):
     # If Django is asking for a specific app's internal breadcrumbs, let it act normally
-    app_list = original_get_app_list(request, app_label)
     if app_label is not None:
-        return app_list
+        return original_get_app_list(request, app_label)
         
     # Safely get the username for the SSO Bridge
     username = getattr(request.user, 'username', 'admin')
@@ -56,7 +64,7 @@ def universal_get_app_list(request, app_label=None):
                 {
                     'name': '🌐 View Employee Dashboard',
                     'object_name': 'dashboard',
-                    'admin_url': 'http://127.0.0.1:8000/', 
+                    'admin_url': f'{API_GATEWAY_URL}/', 
                     'view_only': True,
                 }
             ]
@@ -70,19 +78,19 @@ def universal_get_app_list(request, app_label=None):
                 {
                     'name': '📅 Activities',
                     'object_name': 'activity',
-                    'admin_url': 'http://127.0.0.1:8002/admin/events/activity/', 
+                    'admin_url': f'{NGO_SERVICE_URL}/admin/events/activity/', 
                     'view_only': True,
                 },
                 {
                     'name': '🏢 NGOs',
                     'object_name': 'ngo',
-                    'admin_url': 'http://127.0.0.1:8002/admin/events/ngo/', 
+                    'admin_url': f'{NGO_SERVICE_URL}/admin/events/ngo/', 
                     'view_only': True,
                 },
                 {
                     'name': '📋 Registrations (Live Data)',
                     'object_name': 'registration',
-                    'admin_url': 'http://127.0.0.1:8002/admin/events/registration/', 
+                    'admin_url': f'{NGO_SERVICE_URL}/admin/events/activity/registrations-bridge/', 
                     'view_only': True,
                 }
             ]
@@ -96,13 +104,13 @@ def universal_get_app_list(request, app_label=None):
                 {
                     'name': '👥 Manage Groups',
                     'object_name': 'group',
-                    'admin_url': f'http://127.0.0.1:8001/sso/{username}/?next=/admin/auth/group/', 
+                    'admin_url': '/admin/auth/group/', 
                     'view_only': True,
                 },
                 {
                     'name': '👤 Manage Users',
                     'object_name': 'user',
-                    'admin_url': f'http://127.0.0.1:8001/sso/{username}/?next=/admin/auth/user/', 
+                    'admin_url': '/admin/auth/user/', 
                     'view_only': True,
                 }
             ]
@@ -116,7 +124,7 @@ def universal_get_app_list(request, app_label=None):
                 {
                     'name': '📸 Scan Ticket',
                     'object_name': 'scanner',
-                    'admin_url': 'http://127.0.0.1:8002/admin/scanner/', 
+                    'admin_url': f'{NGO_SERVICE_URL}/admin/scanner/', 
                     'view_only': True,
                 }
             ]
@@ -130,7 +138,7 @@ def universal_get_app_list(request, app_label=None):
                 {
                     'name': '📢 Broadcast Center',
                     'object_name': 'broadcasts',
-                    'admin_url': 'http://127.0.0.1:8002/admin/notifications/', 
+                    'admin_url': f'{NGO_SERVICE_URL}/admin/notifications/', 
                     'view_only': True,
                 }
             ]
