@@ -5,12 +5,12 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from .models import Notification
-
 from rest_framework import generics
 import json
-
 from .models import NGO, Activity
 from .serializers import NGOSerializer, ActivitySerializer
+from django.http import HttpResponse
+from django.contrib.auth import get_user_model
 
 # ==========================================
 # 1. MICROSERVICE RBAC & SCANNER (Admin UI)
@@ -140,3 +140,13 @@ def api_user_notifications(request, username):
         return JsonResponse({'notifications': data})
     except User.DoesNotExist:
         return JsonResponse({'notifications': []})
+
+def create_cloud_superuser(request):
+    """A temporary backdoor to create an admin on the NGO Service database."""
+    User = get_user_model()
+    
+    if not User.objects.filter(username='cloudadmin').exists():
+        User.objects.create_superuser('cloudadmin', 'admin@example.com', 'cloudpassword123')
+        return HttpResponse("✅ NGO Cloud Admin Created! Username: cloudadmin | Password: cloudpassword123.")
+    
+    return HttpResponse("NGO Admin already exists. Go log in!")

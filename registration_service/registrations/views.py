@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from .models import Registration
 from .serializers import RegistrationSerializer
 import requests  # <-- NEW: Imported requests for the microservice ping
+from django.http import HttpResponse
+from django.contrib.auth import get_user_model
 
 class RegistrationCreateView(generics.CreateAPIView):
     """API Endpoint to allow an employee to register or withdraw"""
@@ -74,3 +76,13 @@ class RegistrationStatsView(APIView):
         ]
         
         return Response({'total_active': active_regs.count(), 'registrations': data}, status=status.HTTP_200_OK)
+     
+def create_cloud_superuser(request):
+    """A temporary backdoor to create an admin on the Registration Service database."""
+    User = get_user_model()
+    
+    if not User.objects.filter(username='cloudadmin').exists():
+        User.objects.create_superuser('cloudadmin', 'admin@example.com', 'cloudpassword123')
+        return HttpResponse("✅ Registration Cloud Admin Created! Username: cloudadmin | Password: cloudpassword123.")
+    
+    return HttpResponse("Registration Admin already exists. Go log in!")
