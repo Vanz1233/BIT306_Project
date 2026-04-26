@@ -117,13 +117,8 @@ JAZZMIN_SETTINGS = {
     "site_header": "AuraIT Connect",
     "site_brand": "AuraIT Management",
     
-    "topmenu_links": [
-        {
-            "name": " Logout", 
-            "url": "admin:logout", 
-            "classes": "btn btn-danger text-white fw-bold", 
-        }
-    ],
+    # ---> THE FIX IS HERE: Wiped out the broken links <---
+    "topmenu_links": [],
     
     "custom_css": "css/admin_tweaks.css",
     "theme": "litera", 

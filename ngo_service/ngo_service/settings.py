@@ -1,4 +1,3 @@
-
 import os
 from pathlib import Path
 
@@ -116,13 +115,8 @@ JAZZMIN_SETTINGS = {
     
     "theme": "litera", 
 
-    "topmenu_links": [
-        {
-            "name": " Logout", 
-            "url": "admin:logout", 
-            "classes": "btn btn-danger text-white fw-bold", 
-        }
-    ],
+    # ---> THE FIX IS HERE: Wiped out the broken links <---
+    "topmenu_links": [],
 
     "icons": {
         "events.Activity": "fas fa-calendar-alt",
