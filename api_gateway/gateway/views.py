@@ -105,12 +105,14 @@ def frontend_dashboard(request):
         mock_user = {'is_authenticated': False}
         is_admin = False
 
+    # ---> THE FIX IS RIGHT HERE! <---
     context = {
         'activities': activities,
         'now': timezone.now(),
         'user': mock_user, 
         'user_registered_ids': user_registered_ids, # Now the HTML knows what to hide!
         'is_admin_user': is_admin, 
+        'ngo_service_url': NGO_SERVICE_URL, # We added this line to pass the cloud URL to HTML
     }
     return render(request, 'service_dashboard/index.html', context)
 
